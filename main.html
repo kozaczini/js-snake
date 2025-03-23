@@ -26,13 +26,11 @@
 </head>
 <body>
 
-    <!-- Ekran startowy -->
     <div id="startScreen">
         <h1>Snake Game</h1>
         <button id="startButton">Play</button>
     </div>
 
-    <!-- Główna gra -->
     <div id="gameContainer">
         <canvas id="game"></canvas>
         <button id="restart">Restart Game</button>
@@ -117,7 +115,7 @@
         if (!isRunning) {
             clearInterval(gameInterval);
             alert("Game over!");
-            document.querySelector("#restart").style.display = "block"; // Pokaż przycisk restartu
+            document.querySelector("#restart").style.display = "block"; // restart button
         }
     }
 
