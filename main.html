@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body { margin: 0; overflow: hidden; text-align: center; font-family: Arial, sans-serif; }
+        #gameContainer { display: none; position: relative; }
+        #game { display: block; }
+        #restart {position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 15px 30px;
+    font-size: 20px;
+    cursor: pointer;
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    display: none;}
+        #startScreen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: black; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #startScreen button { padding: 15px 30px; font-size: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- Ekran startowy -->
+    <div id="startScreen">
+        <h1>Snake Game</h1>
+        <button id="startButton">Play</button>
+    </div>
+
+    <!-- Główna gra -->
+    <div id="gameContainer">
+        <canvas id="game"></canvas>
+        <button id="restart">Restart Game</button>
+    </div>
+
+   <script>
+    let gridSize = 20;
+    let canvas, canvasContext;
+    let snake, dx, dy, food, isRunning, gameInterval;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    function initGame() {
+        canvas = document.querySelector('#game');
+        canvasContext = canvas.getContext('2d');
+
+        resizeCanvas();
+
+        snake = [{x: 200, y: 200}];
+        dx = gridSize;
+        dy = 0;
+        food = {
+            x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+            y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize
+        };
+        isRunning = true;
+
+        draw();
+        clearInterval(gameInterval);
+        gameInterval = setInterval(gameLoop, 100);
+    }
+
+    function drawSnake() {
+        canvasContext.fillStyle = "lime";
+        snake.forEach(segment => {
+            canvasContext.fillRect(segment.x, segment.y, gridSize, gridSize);
+        });
+    }
+
+    function drawFood() {
+        canvasContext.fillStyle = "red";
+        canvasContext.fillRect(food.x, food.y, gridSize, gridSize);
+    }
+
+    function draw() {
+        canvasContext.fillStyle = "black";
+        canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+        drawFood();
+        drawSnake();
+    }
+
+    function moveSnake() {
+        let newHead = { x: snake[0].x + dx, y: snake[0].y + dy };
+        snake.unshift(newHead);
+
+        if (newHead.x === food.x && newHead.y === food.y) {
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+                y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize
+            };
+        } else {
+            snake.pop();
+        }
+    }
+
+    function checkCollision() {
+        let head = snake[0];
+
+        if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+            isRunning = false;
+        }
+
+        for (let i = 1; i < snake.length; i++) {
+            if (head.x === snake[i].x && head.y === snake[i].y) {
+                isRunning = false;
+            }
+        }
+
+        if (!isRunning) {
+            clearInterval(gameInterval);
+            alert("Game over!");
+            document.querySelector("#restart").style.display = "block"; // Pokaż przycisk restartu
+        }
+    }
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "ArrowUp" && dy === 0) {
+            dx = 0;
+            dy = -gridSize;
+        } else if (event.key === "ArrowDown" && dy === 0) {
+            dx = 0;
+            dy = gridSize;
+        } else if (event.key === "ArrowLeft" && dx === 0) {
+            dx = -gridSize;
+            dy = 0;
+        } else if (event.key === "ArrowRight" && dx === 0) {
+            dx = gridSize;
+            dy = 0;
+        }
+    });
+
+    function gameLoop() {
+        if (!isRunning) return;
+        moveSnake();
+        checkCollision();
+        draw();
+    }
+
+    document.querySelector("#restart").addEventListener("click", function(){
+        document.querySelector("#restart").style.display = "none";
+        initGame();
+    });
+
+    document.querySelector("#startButton").addEventListener("click", function() {
+        document.querySelector("#startScreen").style.display = "none"; // Ukryj ekran startowy
+        document.querySelector("#gameContainer").style.display = "block"; // Pokaż grę
+        initGame();
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+   </script>
+</body>
+</html>
